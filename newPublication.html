@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faire une Publication</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<div class="container my-5">
+    <section class="content-header text-center mb-5">
+        <h1>Faire une Publication</h1>
+        <form id="publicationForm">
+            <div class="mb-3">
+                <label for="title" class="form-label">Titre</label>
+                <input type="text" class="form-control" id="title" required>
+            </div>
+            <div class="mb-3">
+                <label for="topic" class="form-label">Sujet</label>
+                <input type="text" class="form-control" id="topic" required>
+            </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">Description</label>
+                <textarea class="form-control" id="description" rows="3" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Publier</button>
+        </form>
+    </section>
+</div>
+
+<script>
+    document.getElementById('publicationForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        // Get form values
+        const title = document.getElementById('title').value;
+        const topic = document.getElementById('topic').value;
+        const description = document.getElementById('description').value;
+
+        // Create publication object
+        const publication = {
+            title: title,
+            topic: topic,
+            description: description
+        };
+
+        // Store publication in localStorage
+        let publications = JSON.parse(localStorage.getItem('publications')) || [];
+        publications.push(publication);
+        localStorage.setItem('publications', JSON.stringify(publications));
+
+        // Redirect to publications page
+        window.location.href = 'publications.html';
+    });
+</script>
+
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
