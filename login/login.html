@@ -90,28 +90,49 @@
                 <h3 class="pt-3 font-weight-bold">Connexion</h3>
             </div>
             <div class="panel-body p-3">
-                <form action="index.html" method="POST">
+                <form id="loginForm" action="index.html" method="POST">
                     <div class="form-group py-2">
                         <div class="input-field">
                             <span class="far fa-user p-2"></span>
-                            <input type="text" placeholder="Nom utilisateur" required>
+                            <input type="text" placeholder="Nom utilisateur" id="username" required>
                         </div>
                     </div>
                     <div class="form-group py-1 pb-2">
                         <div class="input-field">
                             <span class="fas fa-lock px-2"></span>
-                            <input type="password" placeholder="Mot de passe" required>
+                            <input type="password" placeholder="Mot de passe" id="password" required>
                             <button class="btn bg-white text-muted">
                                 <span class="far fa-eye-slash"></span>
                             </button>
                         </div>
                     </div>
-                    <a class="btn btn-primary btn-block mt-3" href="../messagerie/msg.html">Se Connecter</a>
+                    <button type="submit" class="btn btn-primary btn-block mt-3">Se Connecter</button>
                 </form>
             </div>
         </div>
     </div>
-    <script type='text/javascript'></script>
+    <script type='text/javascript'>
+        $(document).ready(function() {
+            // Écouteur d'événement pour le soumission du formulaire
+            $('#loginForm').submit(function(event) {
+                // Empêche l'envoi du formulaire par défaut
+                event.preventDefault();
+
+                // Récupère les valeurs des champs utilisateur et mot de passe
+                var username = $('#username').val();
+                var password = $('#password').val();
+
+                // Vérifie si les identifiants sont corrects (username = "lari", password = "12345678")
+                if (username === "lari" && password === "1234") {
+                    // Redirige vers la page de messagerie si les identifiants sont corrects
+                    window.location.href = '../messagerie/msg.html';
+                } else {
+                    // Affiche un message d'erreur
+                    alert('Identifiant incorrect. Veuillez réessayer.');
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>
