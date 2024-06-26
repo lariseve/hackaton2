@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forum sur la Cartographie des Maladies des Plantes</title>
+    <link href='https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css' rel='stylesheet'>
+    <link href='https://use.fontawesome.com/releases/v5.7.2/css/all.css' rel='stylesheet'>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+
+        .forum-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .question, .response {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f1f1f1;
+        }
+
+        .response {
+            margin-left: 40px;
+            background-color: #e9ecef;
+        }
+
+        .question-author, .response-author {
+            font-weight: bold;
+        }
+
+        .timestamp {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .form-group {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="forum-container">
+        <h1>Forum sur la Cartographie des Maladies des Plantes</h1>
+        <div id="forum">
+            <!-- Les questions et réponses seront ajoutées ici -->
+        </div>
+        <div class="form-group">
+            <textarea id="questionInput" class="form-control" rows="3" placeholder="Posez votre question..."></textarea>
+            <button id="askButton" class="btn btn-primary mt-2">Poser la question</button>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/toxicity"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let questions = JSON.parse(localStorage.getItem('forumQuestions')) || [];
+
+            function renderQuestions() {
+                const forum = document.getElementById('forum');
+                forum.innerHTML = '';
+                questions.forEach((question, qIndex) => {
+                    const questionDiv = document.createElement('div');
+                    questionDiv.className = 'question';
+                    questionDiv.innerHTML = `
+                        <p class="question-author">${question.author} - <span class="timestamp">${question.timestamp}</span></p>
+                        <p>${question.content}</p>
+                        <div class="form-group">
+                            <textarea class="form-control response-input" rows="2" placeholder="Répondre..."></textarea>
+                            <button class="btn btn-secondary mt-2 respondButton" data-question-index="${qIndex}">Répondre</button>
+                            <button class="btn btn-secondary mt-2 recordButton" data-question-index="${qIndex}">Répondre par audio</button>
+                        </div>
+                        <div class="responses">
+                            ${question.responses.map(response => `
+                                <div class="response">
+                                    <p class="response-author">${response.author} - <span class="timestamp">${response.timestamp}</span></p>
+                                    <p>${response.content ? response.content : `<audio controls src="${response.audio}"></audio>`}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                    forum.appendChild(questionDiv);
+                });
+            }
+
+            function addQuestion(content) {
+                const newQuestion = {
+                    author: 'Utilisateur',
+                    timestamp: new Date().toLocaleString(),
+                    content: content,
+                    responses: []
+                };
+                questions.push(newQuestion);
+                localStorage.setItem('forumQuestions', JSON.stringify(questions));
+                renderQuestions();
+                triggerAIResponse(newQuestion);
+            }
+
+            function addResponse(qIndex, content, audio = null) {
+                const newResponse = {
+                    author: 'Utilisateur',
+                    timestamp: new Date().toLocaleString(),
+                    content: content,
+                    audio: audio
+                };
+                questions[qIndex].responses.push(newResponse);
+                localStorage.setItem('forumQuestions', JSON.stringify(questions));
+                renderQuestions();
+            }
+
+            function triggerAIResponse(question) {
+                const aiResponses = [
+                    'Pour faire la cartographie des maladies des plantes, vous pouvez utiliser des outils SIG tels que QGIS ou ArcGIS.',
+                    'L\'imagerie satellite et les drones sont des technologies efficaces pour collecter des données sur la santé des plantes.',
+                    'La cartographie des maladies des plantes peut aider à identifier les zones à haut risque et à prendre des mesures préventives.',
+                    'L\'analyse des données climatiques et des sols est cruciale pour comprendre et prédire les maladies des plantes.',
+                    'L\'utilisation de capteurs au sol et de systèmes de surveillance en temps réel peut améliorer la précision de la cartographie.'
+                ];
+                const aiResponseText = aiResponses[Math.floor(Math.random() * aiResponses.length)];
+                const aiResponse = {
+                    author: 'IA',
+                    timestamp: new Date().toLocaleString(),
+                    content: aiResponseText
+                };
+                question.responses.push(aiResponse);
+                localStorage.setItem('forumQuestions', JSON.stringify(questions));
+                renderQuestions();
+
+                // Ajout de la réponse audio
+                const speech = new SpeechSynthesisUtterance(aiResponseText);
+                speechSynthesis.speak(speech);
+
+                speech.onend = () => {
+                    const audioChunks = [];
+                    const mediaRecorder = new MediaRecorder(speechSynthesis.speak(speech));
+                    mediaRecorder.start();
+
+                    mediaRecorder.ondataavailable = event => {
+                        audioChunks.push(event.data);
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            aiResponse.audio = e.target.result;
+                            localStorage.setItem('forumQuestions', JSON.stringify(questions));
+                            renderQuestions();
+                        };
+                        reader.readAsDataURL(audioBlob);
+                    };
+                };
+            }
+
+            document.getElementById('askButton').addEventListener('click', function() {
+                const questionInput = document.getElementById('questionInput');
+                if (questionInput.value.trim()) {
+                    addQuestion(questionInput.value.trim());
+                    questionInput.value = '';
+                }
+            });
+
+            document.getElementById('forum').addEventListener('click', function(event) {
+                if (event.target.classList.contains('respondButton')) {
+                    const qIndex = event.target.getAttribute('data-question-index');
+                    const responseInput = event.target.previousElementSibling;
+                    if (responseInput.value.trim()) {
+                        addResponse(qIndex, responseInput.value.trim());
+                        responseInput.value = '';
+                    }
+                } else if (event.target.classList.contains('recordButton')) {
+                    const qIndex = event.target.getAttribute('data-question-index');
+                    navigator.mediaDevices.getUserMedia({ audio: true })
+                        .then(stream => {
+                            const mediaRecorder = new MediaRecorder(stream);
+                            mediaRecorder.start();
+
+                            const audioChunks = [];
+                            mediaRecorder.ondataavailable = event => {
+                                audioChunks.push(event.data);
+                            };
+
+                            mediaRecorder.onstop = () => {
+                                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                                const reader = new FileReader();
+                                reader.onload = function(e) {
+                                    addResponse(qIndex, null, e.target.result);
+                                };
+                                reader.readAsDataURL(audioBlob);
+                            };
+
+                            setTimeout(() => {
+                                mediaRecorder.stop();
+                            }, 5000); // Enregistrement de 5 secondes
+                        })
+                        .catch(error => {
+                            console.error('Erreur d\'accès au microphone:', error);
+                        });
+                }
+            });
+
+            renderQuestions();
+        });
+    </script>
+</body>
+
+</html>
