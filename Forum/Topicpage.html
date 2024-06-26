@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic Page</title>
+  <style>
+    /* Styles CSS pour la mise en forme */
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 24px;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    li {
+      margin-bottom: 10px;
+    }
+    textarea {
+      width: 100%;
+      height: 100px;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div id="topic-page">
+    <h1 id="topic-title">Sujet 1</h1>
+    <ul id="posts-list">
+      <li>Ceci est le premier message.</li>
+      <li>Ceci est une réponse.</li>
+    </ul>
+    <form id="reply-form">
+      <textarea id="reply-textarea" placeholder="Votre réponse"></textarea>
+      <button id="reply-button" type="submit">Envoyer</button>
+    </form>
+  </div>
+
+  <script>
+    // Script JavaScript pour gérer la soumission du formulaire (simulation)
+    document.getElementById('reply-form').addEventListener('submit', function(event) {
+      event.preventDefault();
+      var replyContent = document.getElementById('reply-textarea').value;
+      var postsList = document.getElementById('posts-list');
+      var newPost = document.createElement('li');
+      newPost.textContent = replyContent;
+      postsList.appendChild(newPost);
+      document.getElementById('reply-textarea').value = '';
+    });
+  </script>
+</body>
+</html>
